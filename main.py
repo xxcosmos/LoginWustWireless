@@ -1,5 +1,4 @@
 import requests
-import json
 
 
 def login_by_username(username, password):
@@ -17,29 +16,17 @@ def login_by_username(username, password):
     return response.json()
 
 
-def get_json_object(path):
-    with open(path) as f:
-        return json.load(f)
+def handle_response(student_info):
+    username = student_info.student_id
+    password = student_info.id_number[6, 14]
+    response = login_by_username(username, password)
+    message = str(response["message"])
+    result = str(response["result"])
 
-
-if __name__ == '__main__':
-    account_list = get_json_object("account_list.json")
-    for account in account_list:
-        username = account["username"]
-        password = str(account["pwd"])[6:14]
-        print("学号：%s\t密码：%s" % (username, password))
-
-        response = login_by_username(username, password)
-        message = str(response["message"])
-        result = response["result"]
-
-        if message.find("当前无可用套餐") != -1:
-            continue
-        if message.find("密码错误") != -1:
-            account_list
-        if result == "success" or result == "online":
-            print("连接成功")
-            break
-        if message.find("内部") >= 0:
-            print(message)
-            break
+    if "online" in result:
+        return -10
+    if "密码错误" in message:
+        return -1
+    if "内部" in message:
+        return -2
+    return 0
